@@ -1,6 +1,9 @@
 version = 1
 revision = 3
 requires-python = ">=3.13"
+required-markers = [
+    "sys_platform == 'win32'",
+]
 
 [[package]]
 name = "build"
@@ -168,7 +171,7 @@ wheels = [
 [[package]]
 name = "winoutlook"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "email-validator" },
     { name = "pywin32", marker = "sys_platform == 'win32'" },
