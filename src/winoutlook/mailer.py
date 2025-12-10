@@ -4,7 +4,7 @@ from pathlib import Path
 from time import sleep, time
 
 import pythoncom
-import win32com.client as win32
+import win32com.client as win32_client
 from email_validator import EmailNotValidError, validate_email
 from win32com.client.dynamic import CDispatch
 
@@ -26,13 +26,8 @@ class Mailer:
     def _get_outlook() -> CDispatch:
         """Return the Outlook application object."""
         timeout = 20
-        # pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
-        pythoncom.CoInitialize()
-        outlook = win32.Dispatch('Outlook.Application')
-        # try:
-        #     outlook = win32.GetActiveObject('Outlook.Application')
-        # except pythoncom.com_error:
-        #     outlook = win32.Dispatch('Outlook.Application')
+        pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
+        outlook = win32_client.Dispatch('Outlook.Application')
 
         start = time()
         while True:
@@ -47,7 +42,7 @@ class Mailer:
                 sleep(1)
 
     @classmethod
-    def _get_default_account(cls) -> tuple[str, str]:
+    def __get_default_account(cls) -> tuple[str, str]:
         """Return the default account for the current Outlook session."""
         outlook = cls._get_outlook()
 
@@ -65,12 +60,11 @@ class Mailer:
             address = cls.email_normalizer(address_entry.Address)
             return name, address
 
-
     @classmethod
     def get_default_account(cls) -> tuple[str, str]:
         """Return the default account for the current Outlook session."""
         try:
-            name, address = cls._get_default_account()
+            name, address = cls.__get_default_account()
             return name, address
         except Exception as err:
             raise Exception(f'Error getting default account: {err}') from err
@@ -78,7 +72,7 @@ class Mailer:
             pythoncom.CoUninitialize()
 
     @classmethod
-    def _send_email(
+    def __send_email(
         cls,
         recipient: str,
         subject: str,
@@ -147,34 +141,7 @@ class Mailer:
     ):
         """Send an email with optional attachments."""
         try:
-            cls._send_email(
-                recipient=recipient,
-                subject=subject,
-                body=body,
-                html_format=html_format,
-                attachments=attachments,
-                send_using_account=send_using_account,
-                sent_on_behalf_of_name=sent_on_behalf_of_name,
-            )
-        except Exception as err:
-            raise Exception(f'Error sending email: {err}') from err
-        finally:
-            pythoncom.CoUninitialize()
-
-    @classmethod
-    def __send_email(
-        cls,
-        recipient: str,
-        subject: str,
-        body: str,
-        html_format: bool = False,
-        attachments: str | os.PathLike | list[str | os.PathLike] | None = None,
-        send_using_account: str | None = None,
-        sent_on_behalf_of_name: str | None = None,
-    ):
-        """Send an email with optional attachments."""
-        try:
-            cls.send_email(
+            cls.__send_email(
                 recipient=recipient,
                 subject=subject,
                 body=body,
